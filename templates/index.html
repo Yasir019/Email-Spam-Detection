@@ -1,0 +1,39 @@
+<html>
+    <head>
+        <title>Email Spam Detection</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> 
+    </head>
+
+    <body>
+        <h1 align="center" >Email Spam Detection</h1>
+        <form action="\Prediction" method="post">
+            <table align="center">
+                <tr>
+                    <td>
+                        <label>Put you Email Here...</label><br>
+                        <textarea name="Email" row="5" cols="50"></textarea>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <button type="submit">Check Email</button>
+
+                    </td>
+                </tr>
+            </table>
+        </form>
+
+{% if prediction is defined %}
+    {% if prediction == 0 %}
+        <div class="alert alert-success" role="alert">Ham Email!</div>
+    {% elif prediction == 1 %}
+        <div class="alert alert-danger" role="alert">Spam Email!</div>
+    {% else %}
+        <div class="alert alert-warning" role="alert">Please enter an email message.</div>
+    {% endif %}
+{% endif %}
+
+
+    </body>
+</html>
