@@ -1,6 +1,7 @@
 from flask import Flask , request , render_template
 import nltk
 nltk.download('wordnet')
+nltk.download('stpwords')
 import re
 import string
 import nltk
@@ -48,7 +49,6 @@ def Prediction():
     else:
         return render_template("index.html")
 
-        
-
+    
 if __name__=="__main__":
     app.run(debug=True)
