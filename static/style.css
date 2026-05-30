@@ -312,6 +312,27 @@ button:hover {
     font-weight: 700;
 }
 
+.source-pill {
+    width: fit-content;
+    max-width: 100%;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 4px 9px;
+    background: #eef4ff;
+    color: var(--blue-dark);
+    font-size: 12px;
+    font-weight: 800;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.score-line {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+}
+
 .subject {
     font-size: 15px;
     font-weight: 900;
@@ -357,6 +378,21 @@ button:hover {
     font-size: 14px;
     line-height: 1.45;
     overflow-wrap: anywhere;
+}
+
+.source-line {
+    margin-top: 8px;
+    color: var(--blue-dark);
+    font-size: 13px;
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+
+.score-detail {
+    margin-top: 7px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 800;
 }
 
 .message-body {

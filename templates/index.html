@@ -42,7 +42,7 @@
                     <div class="notice warning">Please enter an email message.</div>
                 {% else %}
                     <div class="notice {{ prediction.class_name }}">
-                        This message looks like <strong>{{ prediction.label }}</strong>.
+                        This message looks like <strong>{{ prediction.label }}</strong>. Spam score: {{ prediction.confidence }}% - Model score: {{ prediction.model_confidence }}%.
                     </div>
                 {% endif %}
             {% endif %}
@@ -62,7 +62,7 @@
                         Provider
                         <select name="provider" id="provider">
                             {% for key, provider in providers.items() %}
-                                <option value="{{ key }}" data-host="{{ provider.host }}" data-port="{{ provider.port }}"
+                                <option value="{{ key }}" data-host="{{ provider.host }}" data-port="{{ provider.port }}" data-spam-folder="{{ provider.spam_folder }}"
                                     {% if selected_provider == key %}selected{% endif %}>
                                     {{ provider.label }}
                                 </option>
@@ -81,8 +81,13 @@
                     </label>
 
                     <label>
-                        Folder
+                        Inbox folder
                         <input type="text" name="folder" value="{{ selected_folder or 'INBOX' }}">
+                    </label>
+
+                    <label>
+                        Spam folder
+                        <input type="text" name="spam_folder" id="spam_folder" value="{{ selected_spam_folder or providers.gmail.spam_folder }}">
                     </label>
 
                     <label class="wide">
@@ -96,15 +101,20 @@
                     </label>
 
                     <label>
-                        Emails to import
-                        <input type="number" name="limit" value="{{ selected_limit or 15 }}" min="1" max="50">
+                        Inbox emails
+                        <input type="number" name="inbox_limit" value="{{ selected_inbox_limit or 8 }}" min="0" max="50">
+                    </label>
+
+                    <label>
+                        Spam emails
+                        <input type="number" name="spam_limit" value="{{ selected_spam_limit or 7 }}" min="0" max="50">
                     </label>
                 </div>
 
-                <button type="submit">Import Inbox</button>
+                <button type="submit">Import Test Emails</button>
             </form>
 
-            <p class="helper-text">Use an app password for Gmail, Outlook, or Yahoo if normal login is blocked. Credentials are only used for this request.</p>
+            <p class="helper-text">Default test sample imports 8 emails from Inbox and 7 from Spam/Junk. Use an app password for Gmail, Outlook, or Yahoo if normal login is blocked.</p>
 
             {% if email_error %}
                 <div class="notice warning">{{ email_error }}</div>
@@ -131,6 +141,8 @@
                                     <span class="sender">{{ message.sender }}</span>
                                     <span class="result-pill small {{ message.prediction.class_name }}">{{ message.prediction.label }}</span>
                                 </span>
+                                <span class="source-pill">{{ message.source }}: {{ message.source_folder }}</span>
+                                <span class="score-line">Spam score: {{ message.prediction.confidence }}% - Model: {{ message.prediction.model_confidence }}%</span>
                                 <span class="subject">{{ message.subject }}</span>
                                 <span class="preview">{{ message.preview }}</span>
                             </button>
@@ -145,6 +157,8 @@
                                         <p class="eyebrow">{{ message.date }}</p>
                                         <h3>{{ message.subject }}</h3>
                                         <p class="from-line">{{ message.sender }}</p>
+                                        <p class="source-line">Imported from {{ message.source }} folder: {{ message.source_folder }}</p>
+                                        <p class="score-detail">Spam score: {{ message.prediction.confidence }}% - Model score: {{ message.prediction.model_confidence }}%</p>
                                     </div>
                                     <span class="result-pill {{ message.prediction.class_name }}">{{ message.prediction.label }}</span>
                                 </div>
@@ -166,12 +180,14 @@
         const providerSelect = document.querySelector("#provider");
         const hostInput = document.querySelector("#host");
         const portInput = document.querySelector("#port");
+        const spamFolderInput = document.querySelector("#spam_folder");
 
         providerSelect?.addEventListener("change", (event) => {
             const selected = event.target.selectedOptions[0];
             if (event.target.value !== "custom") {
                 hostInput.value = selected.dataset.host;
                 portInput.value = selected.dataset.port;
+                spamFolderInput.value = selected.dataset.spamFolder;
             }
         });
 
