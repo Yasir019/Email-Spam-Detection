@@ -1,39 +1,191 @@
-<html>
-    <head>
-        <title>Email Spam Detection</title>
-        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> 
-    </head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Spam Detection</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="app-header">
+        <div>
+            <p class="eyebrow">Inbox classifier</p>
+            <h1>Email Spam Detection</h1>
+        </div>
+        <div class="status-strip">
+            <span>Manual check</span>
+            <span>IMAP import</span>
+            <span>Click to review</span>
+        </div>
+    </header>
 
-    <body>
-        <h1 align="center" >Email Spam Detection</h1>
-        <form action="\Prediction" method="post">
-            <table align="center">
-                <tr>
-                    <td>
-                        <label>Put you Email Here...</label><br>
-                        <textarea name="Email" row="5" cols="50"></textarea>
-                    </td>
-                </tr>
+    <main class="dashboard">
+        <section class="panel manual-panel">
+            <div class="panel-heading">
+                <div>
+                    <p class="eyebrow">Paste email</p>
+                    <h2>Check one message</h2>
+                </div>
+                {% if prediction is defined and prediction != "empty" %}
+                    <span class="result-pill {{ prediction.class_name }}">{{ prediction.label }}</span>
+                {% endif %}
+            </div>
 
-                <tr>
-                    <td>
-                        <button type="submit">Check Email</button>
+            <form action="{{ url_for('Prediction') }}" method="post" class="manual-form">
+                <label for="Email">Email content</label>
+                <textarea id="Email" name="Email" rows="11" placeholder="Paste an email subject or body here...">{{ manual_email or "" }}</textarea>
+                <button type="submit">Check Email</button>
+            </form>
 
-                    </td>
-                </tr>
-            </table>
-        </form>
+            {% if prediction is defined %}
+                {% if prediction == "empty" %}
+                    <div class="notice warning">Please enter an email message.</div>
+                {% else %}
+                    <div class="notice {{ prediction.class_name }}">
+                        This message looks like <strong>{{ prediction.label }}</strong>.
+                    </div>
+                {% endif %}
+            {% endif %}
+        </section>
 
-{% if prediction is defined %}
-    {% if prediction == 0 %}
-        <div class="alert alert-success" role="alert">Ham Email!</div>
-    {% elif prediction == 1 %}
-        <div class="alert alert-danger" role="alert">Spam Email!</div>
-    {% else %}
-        <div class="alert alert-warning" role="alert">Please enter an email message.</div>
-    {% endif %}
-{% endif %}
+        <section class="panel import-panel">
+            <div class="panel-heading">
+                <div>
+                    <p class="eyebrow">Real inbox</p>
+                    <h2>Import email dashboard</h2>
+                </div>
+            </div>
 
+            <form action="{{ url_for('import_emails') }}" method="post" class="import-form">
+                <div class="field-grid">
+                    <label>
+                        Provider
+                        <select name="provider" id="provider">
+                            {% for key, provider in providers.items() %}
+                                <option value="{{ key }}" data-host="{{ provider.host }}" data-port="{{ provider.port }}"
+                                    {% if selected_provider == key %}selected{% endif %}>
+                                    {{ provider.label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </label>
 
-    </body>
+                    <label>
+                        IMAP host
+                        <input type="text" name="host" id="host" value="{{ selected_host or providers.gmail.host }}" placeholder="imap.gmail.com">
+                    </label>
+
+                    <label>
+                        Port
+                        <input type="number" name="port" id="port" value="{{ selected_port or 993 }}" min="1">
+                    </label>
+
+                    <label>
+                        Folder
+                        <input type="text" name="folder" value="{{ selected_folder or 'INBOX' }}">
+                    </label>
+
+                    <label class="wide">
+                        Email address
+                        <input type="email" name="username" value="{{ selected_username or '' }}" placeholder="you@example.com" autocomplete="username">
+                    </label>
+
+                    <label>
+                        App password
+                        <input type="password" name="password" placeholder="Use an app password" autocomplete="current-password">
+                    </label>
+
+                    <label>
+                        Emails to import
+                        <input type="number" name="limit" value="{{ selected_limit or 15 }}" min="1" max="50">
+                    </label>
+                </div>
+
+                <button type="submit">Import Inbox</button>
+            </form>
+
+            <p class="helper-text">Use an app password for Gmail, Outlook, or Yahoo if normal login is blocked. Credentials are only used for this request.</p>
+
+            {% if email_error %}
+                <div class="notice warning">{{ email_error }}</div>
+            {% endif %}
+        </section>
+
+        <section class="panel inbox-panel">
+            <div class="panel-heading">
+                <div>
+                    <p class="eyebrow">Imported emails</p>
+                    <h2>Inbox review</h2>
+                </div>
+                {% if imported_messages %}
+                    <span class="count-pill">{{ imported_messages|length }} loaded</span>
+                {% endif %}
+            </div>
+
+            {% if imported_messages %}
+                <div class="mail-layout">
+                    <div class="message-list" role="list">
+                        {% for message in imported_messages %}
+                            <button class="message-row {% if loop.first %}active{% endif %}" type="button" data-target="message-{{ loop.index }}">
+                                <span class="message-topline">
+                                    <span class="sender">{{ message.sender }}</span>
+                                    <span class="result-pill small {{ message.prediction.class_name }}">{{ message.prediction.label }}</span>
+                                </span>
+                                <span class="subject">{{ message.subject }}</span>
+                                <span class="preview">{{ message.preview }}</span>
+                            </button>
+                        {% endfor %}
+                    </div>
+
+                    <div class="message-detail">
+                        {% for message in imported_messages %}
+                            <article id="message-{{ loop.index }}" class="message-card {% if loop.first %}active{% endif %}">
+                                <div class="detail-header">
+                                    <div>
+                                        <p class="eyebrow">{{ message.date }}</p>
+                                        <h3>{{ message.subject }}</h3>
+                                        <p class="from-line">{{ message.sender }}</p>
+                                    </div>
+                                    <span class="result-pill {{ message.prediction.class_name }}">{{ message.prediction.label }}</span>
+                                </div>
+                                <p class="message-body">{{ message.body }}</p>
+                            </article>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <h3>No inbox imported yet</h3>
+                    <p>Connect an inbox above, then select any imported email to review its spam or ham prediction.</p>
+                </div>
+            {% endif %}
+        </section>
+    </main>
+
+    <script>
+        const providerSelect = document.querySelector("#provider");
+        const hostInput = document.querySelector("#host");
+        const portInput = document.querySelector("#port");
+
+        providerSelect?.addEventListener("change", (event) => {
+            const selected = event.target.selectedOptions[0];
+            if (event.target.value !== "custom") {
+                hostInput.value = selected.dataset.host;
+                portInput.value = selected.dataset.port;
+            }
+        });
+
+        const rows = document.querySelectorAll(".message-row");
+        const cards = document.querySelectorAll(".message-card");
+
+        rows.forEach((row) => {
+            row.addEventListener("click", () => {
+                rows.forEach((item) => item.classList.remove("active"));
+                cards.forEach((card) => card.classList.remove("active"));
+                row.classList.add("active");
+                document.querySelector(`#${row.dataset.target}`)?.classList.add("active");
+            });
+        });
+    </script>
+</body>
 </html>
