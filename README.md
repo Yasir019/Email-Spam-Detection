@@ -1,14 +1,33 @@
 # Email Spam Detection
 
-A Flask web app that detects whether an email is spam or ham using a trained TF-IDF vectorizer and Logistic Regression model. The app supports both manual email text checking and real inbox import through IMAP.
+A Flask-based web application for classifying email messages as **Spam** or **Ham** using a trained TF-IDF vectorizer and Logistic Regression model. The app supports quick manual text checks and optional real inbox imports through IMAP.
+
+## Interface Preview
+
+### Desktop
+
+![Email Spam Detection desktop interface](docs/screenshots/desktop-home.png)
+
+### Responsive Layout
+
+![Email Spam Detection responsive interface](docs/screenshots/mobile-home.png)
 
 ## Features
 
-- Paste an email message and classify it as spam or ham.
+- Paste an email subject or body and classify it instantly.
 - Import recent emails from Gmail, Outlook/Hotmail, Yahoo, or a custom IMAP server.
-- Review imported emails in a dashboard-style inbox.
-- Click an imported email to view its content and prediction.
-- Responsive UI for desktop and mobile screens.
+- Review imported inbox and spam-folder messages in a dashboard layout.
+- View spam/ham labels with confidence scores.
+- Uses saved ML artifacts for fast local predictions.
+- Responsive interface for desktop and smaller screens.
+
+## Tech Stack
+
+- **Backend:** Python, Flask
+- **Machine Learning:** scikit-learn, TF-IDF, Logistic Regression
+- **Text Processing:** NLTK, regex preprocessing
+- **Email Import:** IMAP over SSL
+- **Frontend:** HTML, CSS, Jinja templates
 
 ## Project Structure
 
@@ -19,6 +38,10 @@ Email-Spam-Detection/
 +-- tfidf.pkl
 +-- requirements.txt
 +-- README.md
++-- docs/
+|   +-- screenshots/
+|       +-- desktop-home.png
+|       +-- mobile-home.png
 +-- static/
 |   +-- style.css
 +-- templates/
@@ -29,20 +52,21 @@ Email-Spam-Detection/
 
 - Python 3.10+
 - Flask
+- beautifulsoup4
 - scikit-learn
 - nltk
 
-The full dependency list is available in `requirements.txt`.
+The full dependency list is included in `requirements.txt`.
 
-## Setup
+## Installation
 
-Create and activate a virtual environment:
+Clone or open the project folder, then create a virtual environment:
 
-```bash
+```powershell
 python -m venv .venv
 ```
 
-On Windows PowerShell:
+Activate the virtual environment on Windows PowerShell:
 
 ```powershell
 .\.venv\Scripts\Activate.ps1
@@ -50,53 +74,80 @@ On Windows PowerShell:
 
 Install dependencies:
 
-```bash
+```powershell
 pip install -r requirements.txt
 ```
 
-## Run the App
+If you only need the runtime dependencies, install:
 
-```bash
+```powershell
+pip install Flask beautifulsoup4 scikit-learn nltk
+```
+
+## Run the Application
+
+Start the Flask app:
+
+```powershell
 python main.py
 ```
 
-Open the app in your browser:
+Open the local app in your browser:
 
 ```text
 http://127.0.0.1:5000/
 ```
 
+On first run, NLTK may download required language data such as `wordnet` and `stopwords`.
+
+## How It Works
+
+1. User text is cleaned by removing HTML, URLs, punctuation, extra spaces, and stop words.
+2. The cleaned message is transformed with the saved `tfidf.pkl` vectorizer.
+3. The trained `LR_model.pkl` Logistic Regression model predicts spam probability.
+4. A lightweight suspicious-keyword score is also considered for stronger spam signals.
+5. The app returns a final label: `Spam` or `Ham`.
+
 ## Using Real Email Import
 
-The inbox dashboard uses IMAP to read recent emails from your mailbox. Select your provider, enter your email address, app password, folder name, and the number of emails to import.
+The inbox dashboard uses IMAP to read recent emails from your mailbox. Select a provider, enter your email address, app password, folder name, and import limits.
 
-Common IMAP hosts:
+Common IMAP settings:
 
-| Provider | IMAP Host | Port |
-| --- | --- | --- |
-| Gmail | `imap.gmail.com` | `993` |
-| Outlook / Hotmail | `outlook.office365.com` | `993` |
-| Yahoo Mail | `imap.mail.yahoo.com` | `993` |
+| Provider | IMAP Host | Port | Spam/Junk Folder |
+| --- | --- | --- | --- |
+| Gmail | `imap.gmail.com` | `993` | `[Gmail]/Spam` |
+| Outlook / Hotmail | `outlook.office365.com` | `993` | `Junk Email` |
+| Yahoo Mail | `imap.mail.yahoo.com` | `993` | `Bulk Mail` |
 
-For most providers, your normal account password will not work. Create an app password from your email account security settings and use that in the app.
-
-## Security Notes
-
-- Email credentials are used only for the current import request.
-- Credentials are not saved by the app.
-- Do not commit `.env` files, local logs, virtual environments, or secrets.
-- This project uses Flask's development server, so it is intended for local development and demos.
+Most email providers require an app password instead of your normal account password. Create one from your account security settings before using the import feature.
 
 ## Model Files
 
-The app expects these trained model artifacts in the project root:
+The app expects these trained artifacts in the project root:
 
 - `tfidf.pkl`
 - `LR_model.pkl`
 
-`tfidf.pkl` transforms cleaned email text into model features. `LR_model.pkl` predicts whether the email is spam or ham.
+Keep both files in the root directory when running the application.
 
-## Prediction Labels
+## Security Notes
 
-- `Ham`: normal email
-- `Spam`: unwanted or suspicious email
+- Email credentials are used only during the current import request.
+- Credentials are not saved by the application.
+- Do not commit `.env` files, logs, virtual environments, or secrets.
+- This project uses Flask's development server and is intended for local demos or development.
+
+## Troubleshooting
+
+If you see `ModuleNotFoundError: No module named 'bs4'`, install BeautifulSoup inside the active virtual environment:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install beautifulsoup4
+```
+
+If `python main.py` uses the wrong Python installation, run the project explicitly with the virtual environment Python:
+
+```powershell
+.\.venv\Scripts\python.exe main.py
+```

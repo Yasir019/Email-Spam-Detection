@@ -1,11 +1,13 @@
 :root {
-    --bg: #f4f7fb;
+    --bg: #f5f7fb;
     --panel: #ffffff;
     --text: #172033;
     --muted: #68758a;
     --line: #dce4ef;
     --blue: #2563eb;
     --blue-dark: #1747b8;
+    --teal: #0f766e;
+    --panel-soft: #f8fbff;
     --green-bg: #dff8ea;
     --green-text: #12633a;
     --red-bg: #ffe4e6;
@@ -22,22 +24,21 @@
 body {
     min-height: 100vh;
     margin: 0;
-    padding: 28px;
+    padding: 34px 28px 42px;
     background:
-        linear-gradient(135deg, rgba(37, 99, 235, 0.10), transparent 34%),
-        linear-gradient(315deg, rgba(18, 99, 58, 0.08), transparent 28%),
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.10), transparent 34%),
+        linear-gradient(180deg, #ffffff 0, var(--bg) 360px),
         var(--bg);
     color: var(--text);
     font-family: Arial, Helvetica, sans-serif;
 }
 
 .app-header {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 20px;
+    display: grid;
+    justify-items: center;
     max-width: 1280px;
-    margin: 0 auto 22px;
+    margin: 0 auto 72px;
+    text-align: center;
 }
 
 h1,
@@ -48,8 +49,11 @@ p {
 }
 
 h1 {
-    font-size: clamp(32px, 5vw, 54px);
-    line-height: 1;
+    max-width: 760px;
+    font-size: clamp(38px, 5vw, 62px);
+    line-height: 1.04;
+    letter-spacing: 0;
+    overflow-wrap: anywhere;
 }
 
 h2 {
@@ -74,7 +78,7 @@ h3 {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    justify-content: flex-end;
+    justify-content: center;
 }
 
 .status-strip span,
@@ -82,13 +86,14 @@ h3 {
     display: inline-flex;
     min-height: 34px;
     align-items: center;
-    border: 1px solid var(--line);
+    border: 1px solid rgba(37, 99, 235, 0.14);
     border-radius: 999px;
     padding: 0 13px;
-    background: rgba(255, 255, 255, 0.72);
-    color: var(--muted);
+    background: rgba(255, 255, 255, 0.86);
+    color: #40506a;
     font-size: 13px;
     font-weight: 700;
+    box-shadow: 0 8px 26px rgba(23, 32, 51, 0.06);
 }
 
 .dashboard {
@@ -100,7 +105,8 @@ h3 {
 }
 
 .panel {
-    border: 1px solid var(--line);
+    min-width: 0;
+    border: 1px solid rgba(220, 228, 239, 0.92);
     border-radius: 8px;
     background: var(--panel);
     box-shadow: var(--shadow);
@@ -108,7 +114,9 @@ h3 {
 
 .manual-panel,
 .import-panel {
-    padding: 22px;
+    padding: 24px;
+    background:
+        linear-gradient(180deg, var(--panel-soft), #ffffff 130px);
 }
 
 .manual-panel {
@@ -117,7 +125,7 @@ h3 {
 
 .inbox-panel {
     grid-column: 1 / -1;
-    padding: 22px;
+    padding: 24px;
 }
 
 .panel-heading {
@@ -130,6 +138,7 @@ h3 {
 
 label {
     display: grid;
+    min-width: 0;
     gap: 7px;
     color: var(--muted);
     font-size: 13px;
@@ -140,6 +149,7 @@ input,
 select,
 textarea {
     width: 100%;
+    min-width: 0;
     border: 1px solid var(--line);
     border-radius: 8px;
     background: #fbfdff;
@@ -173,7 +183,7 @@ button {
     min-height: 42px;
     border: 0;
     border-radius: 8px;
-    background: var(--blue);
+    background: linear-gradient(135deg, var(--blue), var(--teal));
     color: #ffffff;
     cursor: pointer;
     font-size: 15px;
@@ -182,7 +192,7 @@ button {
 }
 
 button:hover {
-    background: var(--blue-dark);
+    background: linear-gradient(135deg, var(--blue-dark), #0b5f59);
     transform: translateY(-1px);
 }
 
@@ -430,8 +440,7 @@ button:hover {
     }
 
     .app-header {
-        align-items: flex-start;
-        flex-direction: column;
+        margin-bottom: 54px;
     }
 
     .status-strip {
@@ -446,6 +455,11 @@ button:hover {
 }
 
 @media (max-width: 560px) {
+    h1 {
+        font-size: 32px;
+        line-height: 1.12;
+    }
+
     .field-grid {
         grid-template-columns: 1fr;
     }
