@@ -145,7 +145,6 @@ If you see `ModuleNotFoundError: No module named 'bs4'`, install BeautifulSoup i
 ```powershell
 .\.venv\Scripts\python.exe -m pip install beautifulsoup4
 ```
-
 If `python main.py` uses the wrong Python installation, run the project explicitly with the virtual environment Python:
 
 ```powershell
