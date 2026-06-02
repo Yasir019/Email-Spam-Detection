@@ -4,7 +4,7 @@ import email
 import imaplib
 import nltk
 nltk.download('wordnet')
-nltk.download('stopwords')
+nltk.download('stopwords') 
 import re
 import string
 import nltk
